@@ -12,7 +12,8 @@ Server side application uses Linux [epoll](https://man7.org/linux/man-pages/man7
 4. Optionaly [Catch2](https://github.com/catchorg/Catch2) to build tests
   
 ## Build
-By default the tests is excluded from the build. Set BUILD_TESTS to ON if you whant to build tests. 
+By default the tests is excluded from the build. 
+Set BUILD_TESTS to ON if you whant to build tests. For example cmake  -S. -Bbuild -DBUILD_TESTS=ON 
 
 ```ch
 git clone https://github.com/0bo084/voltmeter
