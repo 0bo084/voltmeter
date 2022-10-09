@@ -34,8 +34,6 @@ void WokerThread::runCommand(std::unique_ptr<voltio::command>&& cmd)
 
 void WokerThread::run()
 {
-
-    //unlink(path.c_str());
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     fd_guard guard(fd);
     

@@ -28,17 +28,10 @@
 
 namespace voltio {
 
-#define POLL_SIZE 32
-#define LISTEN_QUEUE 5
 
 /*!
 	Thread safe queue for thread pool
 */
-
-
-
-
-
 
 
 /*!
@@ -131,7 +124,7 @@ class epoll
     
 protected:
 
-    static constexpr std::size_t  Backlog = 128;
+    static constexpr std::size_t  Backlog = 1024;
     static constexpr std::size_t  TimeoutPollMS = 100;
     static constexpr std::size_t  MaxNumberOfEpollEvents = Backlog*2;
     static constexpr std::size_t  SizeOfRecvBuffer = 1024;
@@ -280,6 +273,7 @@ protected:
         bool isOk = queues[counter%queues.size()]->push(cliFd);
         if (!isOk) {
             perror("Cant process accepted socket");
+            shutdown(cliFd, SHUT_RDWR); // close connection
             close(cliFd);
             return;
         } 

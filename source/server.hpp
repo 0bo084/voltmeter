@@ -40,6 +40,7 @@ namespace voltio
 
 				// serialization error
 				shutdown(fd, SHUT_RDWR); // close connection
+				close(fd);
 				return;
 			}
 
