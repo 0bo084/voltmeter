@@ -95,24 +95,7 @@ namespace voltio
         }
     }
 
-    inline static void status_to(std::string& info, bool isOk, status_t status) 
-    {
-        
-        if(isOk) {
-            info =  "Ok, ";
-            info += status_to(status);
-        }
-        else
-            info = "Fail, unknown status";
-            
-    }
 
-    
-    static status_t to_status(size_t s) // exception
-    {
-        return  static_cast<status_t>(s);
-    }
-        
 } // namespace voltio
 
 

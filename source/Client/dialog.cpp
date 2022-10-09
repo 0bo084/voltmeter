@@ -23,8 +23,7 @@ Dialog::Dialog(const std::string& path, QWidget *parent)
     QToolBox *toolbox = new QToolBox;
     verticalLayout->addWidget(toolbox);
 
-    int frameStyle = QFrame::Sunken | QFrame::Panel;
-
+    
     QTimer *timer = new QTimer(this);
     
     
@@ -67,7 +66,7 @@ Dialog::Dialog(const std::string& path, QWidget *parent)
     connect(cmdCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(cmdChanged(int)) );
     connect(cmdChannel, SIGNAL(currentIndexChanged(int)), this, SLOT(channelChanged(int)) );
     connect(cmdRange, SIGNAL(currentIndexChanged(int)), this, SLOT(rangeChanged(int)) );
-    connect(periodicCheckButton, SIGNAL(stateChanged(int)), this, SLOT(onRunPeriodically(int)) );
+    //connect(periodicCheckButton, SIGNAL(stateChanged(int)), this, SLOT(onRunPeriodically(int)) );
     connect(startStopButton, &QAbstractButton::clicked, this, &Dialog::startStopCmd);  
 
     // timer
@@ -149,11 +148,6 @@ void Dialog::rangeChanged(int idx)
 }
 
 
-void Dialog::onRunPeriodically(int isOn)
-{
-
-
-}
 
 void Dialog::startStopCmd()
 {

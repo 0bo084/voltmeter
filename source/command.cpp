@@ -20,7 +20,7 @@ response start_measure_cmd::execute() {
     std::string err;
     bool isOk = get_device()->start(get_channel(), err); 
 
-    return response( isOk, std::move(err), get_channel(), get_name());
+    return response( isOk, std::move(err), get_channel(), std::move(get_name()));
 }
 
 response stop_measure_cmd::execute() { 

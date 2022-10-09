@@ -58,6 +58,7 @@ class epoll
         epfd = -1;     //  epoll fd for listen-accept processing
         
     std::atomic<bool> isDone = false;
+    std::string       sock_path;
     
     // to listen and accept new connections
     std::thread acceptor_thread;
@@ -114,9 +115,7 @@ class epoll
     inline static
     int delete_from_epool(int epoolfd, int clfd) {
         
-        struct epoll_event ev;
-        ev.data.fd = clfd;
-
+        
         int r = epoll_control(epoolfd, EPOLL_CTL_DEL, 0, clfd);
         
         return r;
@@ -186,11 +185,15 @@ protected:
 
 
         int fd;
-        int res;
         while (!isDone.load()) {
             
-            while( queue->pop(fd))
-                res = epoll::add_to_epool(epollWokerFd, EPOLLIN, fd);
+            while( queue->pop(fd)) {
+                int res = epoll::add_to_epool(epollWokerFd, EPOLLIN, fd);
+                if (res < 0){
+                    perror("epoll::add_to_epool:");
+                    return;
+                }
+            }
 
             int ready = epoll_wait( epollWokerFd, events, epoll::MaxNumberOfEpollEvents, epoll::TimeoutPollMS);
             
@@ -225,10 +228,14 @@ protected:
         // because someone does against our protocol rules 
         len = recv(fd, recvbuf, sizeof(recvbuf), 0);
             
-        int res;
+      
         if ((len == 0) || (len == sizeof(recvbuf))) { 
             // close connection    
-            res = delete_from_epool(epollfd, fd);
+            int res = delete_from_epool(epollfd, fd);
+            if (res < 0){
+                perror("delete_from_epool:");
+                return;
+            }
             res = close(fd);
             
             printf("[%d] closing connection... \n", fd); 
@@ -249,8 +256,7 @@ protected:
         int cliFd;
         struct sockaddr_in cliaddr;
         int socklen = sizeof(struct sockaddr_in);
-        struct epoll_event ev;
-
+        
         cliFd = ::accept( 
             listenfd, 
             reinterpret_cast<struct sockaddr*>(&cliaddr), 
@@ -333,6 +339,7 @@ protected:
 public:    
     
     epoll(const std::string& path)  // exception
+        : sock_path(path)
     {       
         int ret = create_bind_listen_socket(path);
         if (ret < 0) {
@@ -399,6 +406,7 @@ public:
         for ( woker_queue* q : queues)
             delete q;
         
+        unlink(sock_path.c_str());
         printf("All woker queues have been closed...\n");
           
         printf("Epoll has been closed...\n");

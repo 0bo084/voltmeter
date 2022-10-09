@@ -30,7 +30,8 @@ class dataProvider;
 */
 class deviceChannel 
 {
-    status_t                    status{status_t::error};
+    status_t                    status{status_t::idle};
+    status_t                    prevstatus{status_t::idle};
     std::atomic<float>          value{0.0};
     range_t                     range{range_t::range0};
     mutable std::shared_mutex   mtx;
@@ -46,6 +47,10 @@ class deviceChannel
 
 public:
 
+
+    deviceChannel() = default;
+    deviceChannel(const deviceChannel&) = default;
+
     /*! 
         protocol commands for channel
     */
@@ -59,6 +64,7 @@ public:
         {
         case status_t::busy :
         case status_t::error :
+        case status_t::idle :
             // reset channel, now we are ready to measure
             setStatus(status_t::measure);
             break;
@@ -67,7 +73,7 @@ public:
             break;
         
         default:
-            err = "Unknown channel status!";
+            err = "unknown channel status!";
             setStatus(status_t::error);
             return false;
         } 
@@ -94,7 +100,7 @@ public:
             break;
         
         default:
-            err = "Unknown channel status!";
+            err = "unknown channel status (on stop)!";
             setStatus(status_t::error);
             return false;
         } 
@@ -102,7 +108,7 @@ public:
         return true;
     }
 
-
+    // always returns true
     void set_range(range_t range) noexcept 
     {
         // use exclusive lock while writing data
@@ -112,26 +118,38 @@ public:
     }
 
 
-
-    bool get_status(status_t& st) const noexcept 
-    { 
-        // use shared lock while reading data
-        std::shared_lock<std::shared_mutex> lock(mtx);
-        st = getStatus();
-        return true;
-    }
-
-    bool get_result(float& val, std::string& err) const noexcept
+    // always returns true
+    void get_status(status_t& st) const noexcept 
     { 
         // use shared lock while reading data
         std::shared_lock<std::shared_mutex> lock(mtx);
         
+        st = getStatus();
+    }
+
+    bool get_result(float& val, std::string& err) noexcept
+    { 
+        // use shared lock while reading data
+        std::unique_lock<std::shared_mutex> lock(mtx);
+        
         if (getStatus() == status_t::measure) {
-            val = getValue();
-            return true;
+            
+            // set error status in probabitity way
+            static constexpr double probability = 0.01;
+            //divide to get a number between 0 and 1
+            double result = rand() / static_cast<double>(RAND_MAX);
+   
+            if (result < probability) {
+                setStatus(status_t::error);                
+                return false;
+            }
+            else {
+                val = getValue();
+                return true;
+            }
         }
         else {
-            err = "bad stastus!";
+            err = "bad non measure status!";
             return false;
         }
     }

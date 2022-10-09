@@ -11,8 +11,8 @@
 
 WokerThread::WokerThread(const std::string& _path, QObject *parent)
     : QThread(parent)
-    , isDone(false)
     , path(_path)
+    , isDone(false)
     , queue(WokerThread::QueueSize)
 {
     
@@ -28,10 +28,7 @@ WokerThread::~WokerThread()
 
 void WokerThread::runCommand(std::unique_ptr<voltio::command>&& cmd)
 {
-    
-    bool isOk = queue.push(std::move(cmd));  
-
-
+    queue.push(std::move(cmd));  
 }
 
 
@@ -83,7 +80,8 @@ void WokerThread::run()
         
         char buff[1024];
         ret = recv(fd, buff, sizeof(buff), 0);
-        if(ret < sizeof(buff)) {
+        // static_cast here is not too dangerous because we cant get overflow here
+        if(ret < static_cast<int>(sizeof(buff))) {
             buff[ret] = '\x0';
             emit sendResponse(interThreadData(buff));
         }

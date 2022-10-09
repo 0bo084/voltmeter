@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(Voltcli VERSION 0.1.0 LANGUAGES CXX)
+project(voltcli VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,6 +20,7 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 
 add_compile_definitions("VOLTMETER_CLIENT")
+add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 
 add_executable( ${PROJECT_NAME}
     dialog.cpp

@@ -2,6 +2,7 @@
 #include <signal.h> 
 #include <unistd.h> 
 #include <stdio.h> 
+#include <atomic> 
 
 #include "values.hpp"
 #include "voltmeter.hpp"
@@ -13,12 +14,12 @@
 using namespace voltio;
 
 
-volatile sig_atomic_t flag = 0;
+volatile std::atomic<sig_atomic_t> flag = 0;
 
-void my_function(int sig)
+void my_function(int)
 { // can be called asynchronously
   
-    flag = 1; // set flag
+    flag.store(true); // set flag
 }
 
 
@@ -34,13 +35,10 @@ int main(int, char**)
         printf("Setup signal handler error in signal");
     //      ^          ^
     //  Which-Signal   |-- which user defined function registered
-    while(!flag)  
+    while(!flag.load())  
         sleep(100);
     
     srv.stop();
 
-    return 0;
-    
-    
-    
+    return 0;    
 }

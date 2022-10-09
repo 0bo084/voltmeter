@@ -71,17 +71,22 @@ namespace voltio
         {
             CHECK_CHANNEL_IDX(channel, info);
             status_t status;
-            bool isOk = channels[channel].get_status(status);
-            status_to(info, isOk, status);
-            return isOk;
+            channels[channel].get_status(status);
+            
+            return true;
         }
 
-        bool get_result(size_t channel, std::string& err)
+        bool get_result(size_t channel, std::string& info)
         {
-            CHECK_CHANNEL_IDX(channel, err);
+            CHECK_CHANNEL_IDX(channel, info);
             float val = 0.0;
-            bool isOk = channels[channel].get_result(val, err);
-            cmdFactory::result_to(err, isOk, val, err);
+            bool isOk = channels[channel].get_result(val, info);
+            //! make positive resp. Negative has aldeady done in @info
+            if (isOk) { 
+                info += std::to_string( val);
+                info += " volts";
+            }
+            
             return isOk;
         }
     };

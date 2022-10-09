@@ -43,7 +43,6 @@ private slots:
     void startStopCmd();
     void cmdChanged(int idx);
     void rangeChanged(int idx);
-    void onRunPeriodically(int isOn);
     void channelChanged(int idx);
     void onTimer();
     

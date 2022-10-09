@@ -47,8 +47,9 @@ namespace voltio
 
 			std::string ser;
 			ser.resize(epoll::SizeOfRecvBuffer);
-			bool isOk = cmdFactory::make( ser, resp);
-
+			
+			cmdFactory::make( ser, resp);
+			
 			send(fd, ser.c_str(), ser.length(), 0);
 
 			cmd.release();

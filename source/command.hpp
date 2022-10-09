@@ -13,7 +13,6 @@
 #include <cstddef>
 #include <memory>
 #include <string>
-#include <sstream>
 #include <algorithm>
 
 #include "voltio.hpp"
@@ -40,24 +39,24 @@ public:
         , channel(0)
         {}
 
-    response(bool _isOk, std::string&& info, size_t ch, std::string&& _cmd) 
+    response(bool _isOk, std::string&& _info, size_t ch, std::string&& _cmd) 
         : isOk(_isOk)
-        , info(std::move(info))
         , channel(ch)
+        , info(std::move(_info))
         , cmd(std::move(_cmd))
         {}
 
     response(const response& other)
         : isOk(other.isOk)
-        , info(other.info)
         , channel(other.channel)
+        , info(other.info)
         , cmd(other.cmd)
         {}    
 
     response(response&& other) 
         : isOk(std::move(other.isOk))
-        , info(std::move(other.info))
         , channel(std::move(other.channel))
+        , info(std::move(other.info))
         , cmd(std::move(other.cmd))
         {}
 
@@ -76,16 +75,12 @@ public:
         ser += "] ";
         ser += get_cmd();
 
-        if(get_isOk()) {
-            
-            ser += ": Ok ";
+        ser += (get_isOk()) ? ": Ok" : ": Fail";
+        if(get_info().size()) {
+            ser += ", ";
             ser += get_info();
         }
-        else {
-            ser += ": Fail ";
-            ser += get_info();
-        }
-
+        
         return true;
     }
 };
@@ -148,13 +143,16 @@ class cmd: public command, public T {
 
 protected:
 
-    auto get_channel() const {return channel;}
-    auto get_device() {return device;}
+    
 
     cmd(size_t ch, voltmeter* dev) noexcept : channel(ch), device(dev) {} 
 
 public:
 
+    auto get_device() noexcept {return device;}
+    
+    auto get_channel() const noexcept {return channel;}
+    
 
     virtual bool serialize(std::string& ser) const override 
     {
@@ -170,21 +168,23 @@ public:
 
 class start_measure_cmd: public cmd<start_measure> {
 
-        friend class cmdFactory;
-        virtual bool serialize(std::string& ser) const final
-        {
-            bool isOk = cmd<start_measure>::serialize(ser);
-            return isOk;
-        }
+   
+    
+public:
+
+    virtual bool serialize(std::string& ser) const final
+    {
+        bool isOk = cmd<start_measure>::serialize(ser);
+        return isOk;
+    }
 
 
-    public:
-        start_measure_cmd( size_t channel, voltmeter* dev) noexcept : cmd<start_measure>(channel,dev) {}
-        
-        std::string get_name() const {return get_result::name;}
+    start_measure_cmd( size_t channel, voltmeter* dev) noexcept : cmd<start_measure>(channel,dev) {}
+    
+    std::string get_name() const {return start_measure::name;}
 
 #ifndef VOLTMETER_CLIENT   
-        virtual response execute() final;
+    virtual response execute() final;
 #endif        
 
         
@@ -193,31 +193,32 @@ class start_measure_cmd: public cmd<start_measure> {
 class set_range_cmd: public cmd<set_range> {
 
         
-        range_t range;
+    range_t range;
 
-        friend class cmdFactory;
-        virtual bool serialize(std::string& ser) const final
-        {
-            bool isOk = cmd<set_range>::serialize(ser);
 
-            ser += " range";
-            ser += std::to_string(range_to(get_range()));
+public:
 
-            return isOk;
-        }
+    virtual bool serialize(std::string& ser) const final
+    {
+        bool isOk = cmd<set_range>::serialize(ser);
+
+        ser += ", range";
+        ser += std::to_string(range_to(get_range()));
+
+        return isOk;
+    }
         
-    public:
+   
+    set_range_cmd(size_t channel, range_t _range, voltmeter* dev) noexcept 
+        : cmd<set_range>(channel, dev)
+        , range(_range) 
+    {
+    }
+
     
-        set_range_cmd(size_t channel, range_t _range, voltmeter* dev) noexcept 
-            : cmd<set_range>(channel, dev)
-            , range(_range) 
-        {
-        }
-
-        
-        std::string get_name() const noexcept {return set_range::name;}
-        range_t get_range() const noexcept {return range;}
-        
+    std::string get_name() const noexcept {return set_range::name;}
+    range_t get_range() const noexcept {return range;}
+    
         
 #ifndef VOLTMETER_CLIENT   
         virtual response execute() final;
@@ -227,62 +228,62 @@ class set_range_cmd: public cmd<set_range> {
 
 class stop_measure_cmd : public cmd<stop_measure> {
 
-        friend class cmdFactory;
-        virtual bool serialize(std::string& ser) const final
-        {
-            bool isOk = cmd<stop_measure>::serialize(ser);
-            return isOk;
-        }
+public:
+    
+    virtual bool serialize(std::string& ser) const final
+    {
+        bool isOk = cmd<stop_measure>::serialize(ser);
+        return isOk;
+    }
 
 
-    public:
-        stop_measure_cmd(size_t channel, voltmeter* dev) noexcept : cmd<stop_measure>(channel,dev) {}
 
-        std::string get_name() const {return stop_measure::name;}
+    stop_measure_cmd(size_t channel, voltmeter* dev) noexcept : cmd<stop_measure>(channel,dev) {}
+
+    std::string get_name() const {return stop_measure::name;}
 
 #ifndef VOLTMETER_CLIENT   
-        virtual response execute() final;
+    virtual response execute() final;
 #endif        
 
 };
 
 class get_status_cmd : public cmd<get_status> {
 
-        friend class cmdFactory;
-        virtual bool serialize(std::string& ser) const final
-        {
-            bool isOk = cmd<get_status>::serialize(ser);
-            return isOk;
-        }
+public:
+    
+    virtual bool serialize(std::string& ser) const final
+    {
+        bool isOk = cmd<get_status>::serialize(ser);
+        return isOk;
+    }
 
-    public:
-        get_status_cmd(size_t channel, voltmeter* dev) noexcept : cmd<get_status>(channel, dev) {}
+    get_status_cmd(size_t channel, voltmeter* dev) noexcept : cmd<get_status>(channel, dev) {}
 
-        std::string get_name() const {return get_status::name;}
+    std::string get_name() const {return get_status::name;}
 
 
 #ifndef VOLTMETER_CLIENT   
-        virtual response execute() final;
+    virtual response execute() final;
 #endif  
 };
 
 class get_result_cmd : public cmd<get_result> {
+    
+public:
 
-        friend class cmdFactory;
-        virtual bool serialize(std::string& ser) const final
-        {
-            bool isOk = cmd<get_result>::serialize(ser);
-            return isOk;
-        }
+    virtual bool serialize(std::string& ser) const final
+    {
+        bool isOk = cmd<get_result>::serialize(ser);
+        return isOk;
+    }
 
+    get_result_cmd(size_t channel, voltmeter* dev) noexcept : cmd<get_result>(channel, dev) {}
 
-    public:
-        get_result_cmd(size_t channel, voltmeter* dev) noexcept : cmd<get_result>(channel, dev) {}
-
-        std::string get_name() const {return get_result::name;}
+    std::string get_name() const {return get_result::name;}
 
 #ifndef VOLTMETER_CLIENT   
-        virtual response execute() final;
+    virtual response execute() final;
 #endif        
 
 };
@@ -293,13 +294,31 @@ class cmdFactory {
         
         // helpers
         // return true/false and position after spaces
-        static int skip_spaces(const char* buff, size_t len)
+        static int skip_spaces(const char* buff, const size_t len)
         {
             size_t i = 0;
             //! skip spaces 
-            while(buff[i] == ' ' && i < len)
+            while((i < len)&&(buff[i] == ' '))
                 ++i;
             return i;
+        }   
+
+        //! NOTE: if function returns false, @param pos is not valid!
+        static bool search_and_skip(size_t* pos, const char* buff, size_t len, const char symbol)
+        {
+            size_t i = 0;
+            bool isFound = false;
+            //! skip spaces 
+            while(i < len) {
+                if (buff[i++] == symbol){
+                    isFound = true;
+                    break;
+                }
+            }
+            
+            *pos = i;
+
+            return isFound;
         }   
 
     public:
@@ -315,12 +334,12 @@ class cmdFactory {
                 size_t ch, voltmeter& device, const char* buff, size_t len); 
             // constructors
             auto construct_start_measure = 
-                [](size_t ch, voltmeter& device, const char* buff, size_t len) -> std::unique_ptr<command> 
+                [](size_t ch, voltmeter& device, const char*, size_t ) -> std::unique_ptr<command> 
                 {
                     return std::make_unique<start_measure_cmd>(ch, &device);
                 };
             auto construct_stop_measure = 
-                [](size_t ch, voltmeter& device, const char* buff, size_t len) -> std::unique_ptr<command> 
+                [](size_t ch, voltmeter& device, const char* , size_t ) -> std::unique_ptr<command> 
                 {
                     return std::make_unique<stop_measure_cmd>(ch, &device);
                 };
@@ -329,7 +348,10 @@ class cmdFactory {
                 {
                     // parse range id 
                     size_t i = 0;
-                    i = cmdFactory::skip_spaces(buff, len);
+                    bool delimeterFound = cmdFactory::search_and_skip(&i, buff, len, ',');
+                    if (!delimeterFound) return std::unique_ptr<command>();
+                    
+                    i += cmdFactory::skip_spaces(buff + i, len - i);
                     std::string_view ch_view("range");
                     if (0 != ch_view.compare( 
                         0 , ch_view.length(), buff + i, std::min(ch_view.length(),len - i)))
@@ -343,13 +365,13 @@ class cmdFactory {
                 };
             
             auto construct_get_status = 
-                [](size_t ch, voltmeter& device, const char* buff, size_t len) -> std::unique_ptr<command> 
+                [](size_t ch, voltmeter& device, const char* , size_t ) -> std::unique_ptr<command> 
                 {
                     return std::make_unique<get_status_cmd>(ch, &device); 
                 };
             
             auto construct_get_result = 
-                [](size_t ch, voltmeter& device, const char* buff, size_t len) -> std::unique_ptr<command> 
+                [](size_t ch, voltmeter& device, const char* , size_t ) -> std::unique_ptr<command> 
                 {
                     return std::make_unique<get_result_cmd>(ch, &device); 
                 };
@@ -396,10 +418,10 @@ class cmdFactory {
         }
         
         //! make binary stream from reponse obj
-        static bool make( std::string& ser, const response& resp)
+        static void make( std::string& ser, const response& resp)
         {  
-            bool isOk = resp.serialize(ser);
-            return isOk; 
+            resp.serialize(ser);
+             
         }
         
 #else
@@ -414,17 +436,6 @@ class cmdFactory {
 
 #endif
         
-        static void result_to(std::string& info, bool isOk, float val, const std::string& err)
-        {
-            std::stringstream ss;
-
-            if (isOk) 
-                ss << "Ok, " << val << " volts";
-            else
-                ss << "Fail, " << err;
-            
-            info = std::move(ss.str());
-        }
 
 };
 

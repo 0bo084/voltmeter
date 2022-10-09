@@ -16,11 +16,12 @@ Server side application uses Linux [epoll](https://man7.org/linux/man-pages/man7
 ```ch
 git clone https://github.com/0bo084/voltmeter
 cd voltmeter
-cmake --build .
+cmake --build ./build
+
 ```
 ## Installation
 ```ch
-cmake --install .
+cmake --install ./build
 ```
 
 ## Usage
@@ -28,12 +29,12 @@ cmake --install .
 Simple run voltmeter server
 
 ```ch
-./bin/voltmeter
+./bin/voltmetersrv
 ```
 Then run client application Voltcli
 
 ```ch
-./source/Client/bin/voltcli
+./bin/voltcli
 ```
 
 ## License
