@@ -9,9 +9,10 @@ Server side application uses Linux [epoll](https://man7.org/linux/man-pages/man7
 1. Linux OS
 2. [CMake](https://cmake.org) and standart c++ developer's compiler (gcc and others) 
 3. [Qt5](https://www.qt.io) library
+4. Optionaly [Catch2](https://github.com/catchorg/Catch2) to build tests
   
 ## Build
-
+By default the tests is excluded from the build. Set BUILD_TESTS to ON if you whant to build tests. 
 
 ```ch
 git clone https://github.com/0bo084/voltmeter

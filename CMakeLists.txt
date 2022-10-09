@@ -30,6 +30,10 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/source/Client")
 
-enable_testing()
-add_subdirectory(tests)
+option(BUILD_TESTS "build cath2 tests or not" OFF)
+
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
