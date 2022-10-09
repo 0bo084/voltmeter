@@ -30,9 +30,6 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_SOURCE_DIR}/bin)
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/source/Client")
 
-# включаем CTest
-#enable_testing()
-# в качестве фреймворка для тестирования используем GoogleTest
-# find_package(GTest REQUIRED)
-#add_subdirectory(Test)
+enable_testing()
+add_subdirectory(tests)
 

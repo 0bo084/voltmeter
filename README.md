@@ -16,12 +16,12 @@ Server side application uses Linux [epoll](https://man7.org/linux/man-pages/man7
 ```ch
 git clone https://github.com/0bo084/voltmeter
 cd voltmeter
-cmake --build ./build
-
+cmake  -S. -Bbuild
+cmake --build build
 ```
 ## Installation
 ```ch
-cmake --install ./build
+cmake --install build
 ```
 
 ## Usage
