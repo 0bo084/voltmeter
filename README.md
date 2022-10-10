@@ -28,12 +28,12 @@ cmake --install build
 
 ## Usage
 
-Simple run voltmeter server
+Simple run voltmeter server. Press Ctrl+C to exit
 
 ```ch
 ./bin/voltmetersrv
 ```
-Then run client application Voltcli. Press Ctrl+C to exit
+Then run client application Voltcli.
 
 ```ch
 ./bin/voltcli
