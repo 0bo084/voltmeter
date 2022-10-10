@@ -9,6 +9,15 @@
 
 #include "../command.hpp"
 
+#include <unistd.h>
+#include <fcntl.h>
+
+
+static inline bool is_valid_fd(int fd)
+{
+    return (fcntl(fd, F_GETFL) != -1) || (errno != EBADF);
+}
+
 WokerThread::WokerThread(const std::string& _path, QObject *parent)
     : QThread(parent)
     , path(_path)
@@ -74,15 +83,24 @@ void WokerThread::run()
         }    
         voltio::cmdFactory::make(ser,*cmd);   
 
-        ret = send(fd, ser.c_str(), ser.length(), 0);
+        
+        ret = send(fd, ser.c_str(), ser.length(), MSG_NOSIGNAL);
+        if(ret <= 0) {
+            emit sendFatalError( interThreadData("fatal error: connection lost"));
+            return;
+        }
+ 
         
         char buff[1024];
         ret = recv(fd, buff, sizeof(buff), 0);
         // static_cast here is not too dangerous because we cant get overflow here
-        if(ret < static_cast<int>(sizeof(buff))) {
+        if((ret > 0)&&(ret < static_cast<int>(sizeof(buff)))) {
             buff[ret] = '\x0';
             emit sendResponse(interThreadData(buff));
         }
+        else if (ret <= 0)
+            emit sendFatalError( interThreadData("fatal error: connection lost"));
+        
         else 
             emit sendResponse(interThreadData("Response too big: protocol error"));
     }
@@ -94,3 +112,4 @@ void WokerThread::stopProcess()
 {
     isDone.store(true);
 }
+

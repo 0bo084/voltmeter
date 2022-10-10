@@ -72,7 +72,7 @@ namespace voltio
             CHECK_CHANNEL_IDX(channel, info);
             status_t status;
             channels[channel].get_status(status);
-            
+            info = status_to(status);
             return true;
         }
 
