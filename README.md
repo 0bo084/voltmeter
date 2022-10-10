@@ -39,5 +39,11 @@ Then run client application Voltcli
 ./bin/voltcli
 ```
 
+To run test (if you builded project with the -DBUILD_TESTS=ON param):
+
+```ch
+./bin/volttests
+```
+
 ## License
 [UNLICENSE](http://unlicense.org/)
