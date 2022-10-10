@@ -59,7 +59,7 @@ void WokerThread::run()
 
         emit sendFatalError( interThreadData("fatal error: cant connect to server"));
 
-        //return;
+        return;
     }
 
     guard.detach();
@@ -98,9 +98,10 @@ void WokerThread::run()
             buff[ret] = '\x0';
             emit sendResponse(interThreadData(buff));
         }
-        else if (ret <= 0)
+        else if (ret <= 0) {
             emit sendFatalError( interThreadData("fatal error: connection lost"));
-        
+            return;
+        }
         else 
             emit sendResponse(interThreadData("Response too big: protocol error"));
     }

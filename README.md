@@ -33,7 +33,7 @@ Simple run voltmeter server
 ```ch
 ./bin/voltmetersrv
 ```
-Then run client application Voltcli
+Then run client application Voltcli. Press Ctrl+C to exit
 
 ```ch
 ./bin/voltcli
